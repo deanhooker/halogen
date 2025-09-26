@@ -3,12 +3,11 @@ module Component.Counter where
 import Prelude
 
 import CSS.Display (display, flex)
-import CSS.Flexbox (AlignContentValue(..), JustifyContentValue(..), flexDirection, justifyContent, row)
+import CSS.Flexbox (AlignContentValue, JustifyContentValue, flexDirection, justifyContent, row)
 import CSS.Geometry (width)
-import CSS.Property (Value(..))
+import CSS.Property (Value)
 import CSS.Size (rem)
 import CSS.String (fromString)
-import Data.Const (Const)
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
@@ -21,8 +20,9 @@ type Input = Int
 type Output = Int
 type State = { count :: Int }
 
-type Query :: forall k. k -> Type
-type Query = Const Void
+data Query a
+  = SetCount Int a
+  | GetCount (Int -> a)
 
 type Slots :: forall k. Row k
 type Slots = ()
@@ -55,6 +55,7 @@ component = H.mkComponent
       initialize = Just Initialize
     , finalize = Just Finalize
     , handleAction = handleAction
+    , handleQuery = handleQuery
     }
   }
   where
@@ -82,3 +83,8 @@ component = H.mkComponent
         , HH.button [ onClick Increment ] [ HH.text "+"]
         ]
       ]
+
+    handleQuery :: forall a. Query a -> H.HalogenM State Action Slots Output m (Maybe a)
+    handleQuery = case _ of
+      SetCount c a -> H.modify_ _ { count = c } *> pure (Just a)
+      GetCount reply -> H.get >>= \ { count } -> pure $ Just $ reply count
