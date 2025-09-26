@@ -29,13 +29,17 @@ data Query a
 
 type Slots = ( counter :: H.Slot Query Output Int )
 
+type SlotNum = Int
+type CounterValue = Int
+
 data Action
   = Initialize
   | Finalize
   | Decrement
   | Increment
-  | FromChild Int
+  | FromChild SlotNum CounterValue
   | RaiseParent
+  | Received Int
 
 class SpaceEvenly a where
   spaceEvenly :: a
@@ -63,6 +67,7 @@ component numChildren = H.mkComponent
     , finalize = Just Finalize
     , handleAction = handleAction
     , handleQuery = handleQuery
+    , receive = Just <<< Received
     }
   }
   where
@@ -72,8 +77,13 @@ component numChildren = H.mkComponent
       Finalize -> log "Finalized"
       Decrement -> H.modify_ \s -> s { count = s.count - 1}
       Increment -> H.modify_ \s -> s { count = s.count + 1}
-      FromChild c -> log $ "Received from Child: " <> show c
+      FromChild slot c -> do
+        void $ H.tell _counter slot $ SetCount 123
+        count <- H.request _counter slot $ GetCount
+        log $ "Received from Child " <> show (slot + 1) <> ": " <> show c
+        log $ "Queried from Child " <> show (slot + 1) <> ": " <> show count
       RaiseParent -> H.get >>= \ { count } -> H.raise count
+      Received c -> H.modify_ _ { count = c }
 
     render :: State -> H.ComponentHTML Action Slots m
     render { count } = let onClick = HE.onClick <<< const in
@@ -109,7 +119,7 @@ component numChildren = H.mkComponent
                             paddingTop (rem 1.0)
                             paddingBottom (rem 1.0)
                          ] $ range 0 (numChildren - 1) <#> \n ->
-                        HH.slot _counter n (component 0) (n + 1) FromChild ]
+                        HH.slot _counter n (component 0) (n + 1) (FromChild n) ]
 
     handleQuery :: forall a. Query a -> H.HalogenM State Action Slots Output m (Maybe a)
     handleQuery = case _ of
