@@ -5,11 +5,13 @@ You can edit this file as you like.
 { name = "halogen"
 , dependencies =
   [ "aff"
+  , "arrays"
   , "console"
   , "css"
   , "effect"
   , "halogen"
   , "halogen-css"
+  , "halogen-subscriptions"
   , "maybe"
   , "prelude"
   , "psci-support"
