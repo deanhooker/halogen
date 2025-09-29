@@ -8,6 +8,7 @@ You can edit this file as you like.
   , "arrays"
   , "console"
   , "const"
+  , "control"
   , "css"
   , "datetime"
   , "effect"
@@ -19,6 +20,10 @@ You can edit this file as you like.
   , "prelude"
   , "psci-support"
   , "tailrec"
+  , "web-dom"
+  , "web-events"
+  , "web-html"
+  , "web-uievents"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
