@@ -7,14 +7,18 @@ You can edit this file as you like.
   [ "aff"
   , "arrays"
   , "console"
+  , "const"
   , "css"
+  , "datetime"
   , "effect"
+  , "exceptions"
   , "halogen"
   , "halogen-css"
   , "halogen-subscriptions"
   , "maybe"
   , "prelude"
   , "psci-support"
+  , "tailrec"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

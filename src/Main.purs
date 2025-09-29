@@ -2,8 +2,11 @@ module Main where
 
 import Prelude
 
+import Component.CountdownTimer as CountdownTimer
 import Component.Counter as Counter
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
+import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Halogen.Aff as HA
@@ -15,5 +18,9 @@ main = do
   HA.runHalogenAff do
     body <- HA.awaitBody
     io <- runUI (Counter.component 3) 0 body
-    void $ liftEffect $ HS.subscribe io.messages \currentCount ->
+    void $ liftEffect $ HS.subscribe io.messages \currentCount -> do
       log $ "Received Count from Top-level Counter: " <> show currentCount
+      pure Nothing
+    ioTimer <- runUI CountdownTimer.component 15 body
+    void $ liftEffect $ HS.subscribe ioTimer.messages
+      \_ -> launchAff_ io.dispose
